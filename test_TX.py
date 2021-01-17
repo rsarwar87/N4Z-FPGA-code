@@ -20,7 +20,7 @@ ARRAY_SIZE=1024
 
 driver.set_led(8+3)
 driver.set_control(2) #to enable ssb modulator
-sineblock=np.int32(2**22*np.sin(np.arange(1024)/50))
+sineblock=np.int32(2**22*np.sin(np.pi*np.arange(1024)/128))
 driver.reset_tx_fifo()
 print('first write')
 print('Vacancy before write 1: ',driver.get_tx_fifo_vacancy())
@@ -48,6 +48,7 @@ print('Vacancy after write 3 without  a reset, but waiting 100ms: ',driver.get_t
 #driver.reset_tx_fifo()
 print('fourth write')
 driver.write_data(sineblock)
+
 time.sleep(0.1)
 print('Vacancy after write 4 without  a reset, but waiting 100ms: ',driver.get_tx_fifo_vacancy())
 
@@ -61,14 +62,33 @@ print('Vacancy after write 4 without  a reset, but waiting 100ms: ',driver.get_t
 # fig.canvas.draw()
 print('control val is before setting data FIR input: ',driver.get_control_val())
 
-driver.set_FIR_in_val(0)
+driver.set_FIR_in_val(1) #value of 1 send values from the tx fifo into the fir (and ultimately into the data_fifo)
 
 print('control val is after setting data FIR input: ',driver.get_control_val())
-driver.reset_tx_fifo()
-driver.write_data(sineblock)
-print('Data length before reading: ',driver.get_fifo_length())
+#driver.reset_tx_fifo()
 
 time.sleep(0.5)
+driver.reset_fifo() #this should clear the data fifo
+
+driver.write_data(sineblock)
+while driver.get_tx_fifo_vacancy()<1030:
+    pass
+driver.write_data(sineblock)
+while driver.get_tx_fifo_vacancy()<1030:
+    pass
+driver.write_data(sineblock)
+while driver.get_tx_fifo_vacancy()<1030:
+    pass
+driver.write_data(sineblock)
+while driver.get_tx_fifo_vacancy()<1030:
+    pass
+driver.write_data(sineblock)
+while driver.get_tx_fifo_vacancy()<1030:
+    pass
+
+driver.write_data(sineblock)
+print('length before reading: ',driver.get_fifo_length())
+
 a=np.reshape(np.int32(driver.read_data()) ,(ARRAY_SIZE,1))
 print('length after reading: ',driver.get_fifo_length())
 
@@ -76,8 +96,8 @@ plt.figure(1)
 plt.plot(a)
 driver.set_TX_High(1)
 print('control val is after setting TX_High (should just enable SSB modulator!): ',driver.get_control_val())
-driver.set_DAC_out_val(1)
-driver.set_user_io(2**14)
+driver.set_DAC_out_val(0)
+driver.set_user_io(2**13)
 plt.show()
 driver.set_TX_High(0)
 
