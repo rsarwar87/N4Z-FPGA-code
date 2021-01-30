@@ -279,17 +279,23 @@ cell koheron:user:latched_mux:1.0 data_for_fir_q {
 
 set dec_rate_fir [get_parameter fir_decimation_rate]
 #Data input rate at 40kHz paced by the cic
-set fidi [open $project_path/127ptLPF_I.txt r]
+set fidi [open $project_path/128tap_i.txt r]
 gets $fidi charsi
 set fir_coeffs_i $charsi
 puts stdout fir_coeffs_i
 
-set fidq [open $project_path/127ptLPF_Q.txt r]
+set fidq [open $project_path/128tap_q.txt r]
 gets $fidq charsq
 set fir_coeffs_q $charsq
 puts stdout fir_coeffs_q
 #was: [exec python $project_path/fir.py $n_stages $dec_rate $diff_delay print]
-#removed:   BestPrecision true
+
+#removed:
+#  Quantization Maximize_Dynamic_Range 
+#  Coefficient_Fractional_Bits 33 
+#  Coefficient_Structure Inferred 
+
+
 
 cell xilinx.com:ip:fir_compiler:7.2 fir_i {
   Filter_Type Decimation
@@ -301,6 +307,7 @@ cell xilinx.com:ip:fir_compiler:7.2 fir_i {
   Output_Width 32
   Decimation_Rate $dec_rate_fir
   BestPrecision true
+
   CoefficientVector [subst {{$fir_coeffs_i}}]
 } {
   aclk $adc_clk
@@ -318,6 +325,7 @@ cell xilinx.com:ip:fir_compiler:7.2 fir_q {
   Output_Width 32
   Decimation_Rate $dec_rate_fir
   BestPrecision true
+
   CoefficientVector [subst {{$fir_coeffs_q}}]
 } {
   aclk $adc_clk
@@ -394,7 +402,7 @@ NBITS 24
 } {
  clk clk_wiz_1/clk_out1
  rst $rst_adc_clk_name/peripheral_reset
- delta_phase [get_slice_pin diff_phase/S 16 3]
+ delta_phase [get_slice_pin diff_phase/S 13 0] 
  ssb_freq [get_concat_pin [list [get_slice_pin ctl/ssb_tx_frequency 22 0] [get_constant_pin 0 1]] truncated_freq]
  amplitude [get_concat_pin  [list [get_constant_pin 0 8] [get_slice_pin cordic_ssb/m_axis_dout_tdata 15 0] ] padded_amplitude]
  stdby [get_not_pin [get_slice_pin ctl/control 1 1] ]
@@ -414,7 +422,7 @@ cell koheron:user:latched_mux:1.0 data_for_fifo {
             clk  $adc_clk 
             sel [get_slice_pin ctl/control 3 2]
             clken [get_constant_pin 1 1]
-            din [get_concat_pin [list c_addsub_0/S cordic_ssb/m_axis_dout_tdata  cic_i/m_axis_data_tdata data_for_fir_i/dout ] data_options ]
+            din [get_concat_pin [list c_addsub_0/S cordic_ssb/m_axis_dout_tdata  [get_concat_pin [list diff_phase/S [get_constant_pin 0 15] ]  ] [get_concat_pin [list [get_slice_pin fir_i/m_axis_data_tdata 29 14] [get_slice_pin fir_q/m_axis_data_tdata 29 14]  ] i_and_q_data ] ] data_options ]
 
         }
 

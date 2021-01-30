@@ -46,7 +46,7 @@ control_registers:
   - ssb_tx_frequency
 
 
-#control bits: 0 upper or lower side band on reception, 1 TX_high, 2:3 Select data_fifo input (0 RX,1 From TX fifo), 4 select input to FIRs (0 for RX,1 for TX), bit 16 selects DAC output (0 regular as top 16 bits of input val to data_fifo,1 value from user_io register)
+#control bits: 0 upper or lower side band on reception, 1 TX_high, 2:3 Select data_fifo input (0 RX,1 From Cordic, 2 FIR_i, 3 FIR_q), bit 4 select input to FIRs (0 for RX,1 for TX), bit 16 selects DAC output (0 regular as top 16 bits of input val to data_fifo,1 value from user_io register)
 
 status_registers:
   - forty_two

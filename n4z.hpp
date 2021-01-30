@@ -64,6 +64,12 @@ class Nicola4Z
         ctl.write<reg::led>(value);
     }
 
+
+	 void set_ssb_tx_frequency(uint32_t value) {
+        ctl.write<reg::ssb_tx_frequency>(value);
+    }
+	
+	
     void set_ck_outer_io(uint32_t value) {
         ctl.write<reg::ck_outer_io>(value);
     }
