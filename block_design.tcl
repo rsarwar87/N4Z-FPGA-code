@@ -40,7 +40,7 @@ connect_port_pin led1 [get_slice_pin ctl/led 5 3]
 connect_port_pin user_dio [get_slice_pin [ctl_pin user_io] 11 0]
 
 
-#connect_pin [sts_pin ck_inner_io] [get_concat_pin [list [get_constant_pin 0 18]  ck_inner_io ] ]
+connect_pin [sts_pin ck_inner_io] ctl/ssb_tx_frequency
 
 
 #Create clock for DAC, data output
@@ -65,13 +65,14 @@ CLKOUT1_PHASE_ERROR 301.6
 }
 
 cell xilinx.com:ip:clk_wiz clk_wiz_1 {
-CLKOUT1_REQUESTED_OUT_FREQ 8.192 
-MMCM_DIVCLK_DIVIDE 8 
-MMCM_CLKFBOUT_MULT_F 60.375 
-MMCM_CLKOUT0_DIVIDE_F 92.125 
-CLKOUT1_JITTER 624.765 
-CLKOUT1_PHASE_ERROR 617.891
-CLKOUT1_PHASE_ERROR 301.6
+
+CLKOUT1_REQUESTED_OUT_FREQ 65.536 
+MMCM_DIVCLK_DIVIDE 2 
+MMCM_CLKFBOUT_MULT_F 16.875 
+MMCM_CLKOUT0_DIVIDE_F 12.875 
+CLKOUT1_JITTER 188.876 
+CLKOUT1_PHASE_ERROR 137.238
+
 
 
 } {
@@ -79,7 +80,7 @@ CLKOUT1_PHASE_ERROR 301.6
     reset [get_constant_pin 0 1]
 }
 
-#clk_wiz_1/clk_out1 is at 8.192MHz ie 1024 (2^10) times 8kHz
+#clk_wiz_1/clk_out1 is at 65.536MHz ie 8192 (2^13) times 8kHz
 
 
 # Rename clocks - adc_clk in this is 12.8MHz - ie 64x Sample rate of 200ksps and about 1/8 of the ps clock
@@ -403,8 +404,8 @@ NBITS 24
  clk clk_wiz_1/clk_out1
  rst $rst_adc_clk_name/peripheral_reset
  delta_phase [get_slice_pin diff_phase/S 13 0] 
- ssb_freq [get_concat_pin [list [get_slice_pin ctl/ssb_tx_frequency 22 0] [get_constant_pin 0 1]] truncated_freq]
- amplitude [get_concat_pin  [list [get_constant_pin 0 8] [get_slice_pin cordic_ssb/m_axis_dout_tdata 15 0] ] padded_amplitude]
+ ssb_freq  [get_slice_pin ctl/ssb_tx_frequency 17 0] 
+ amplitude [get_concat_pin  [list [get_constant_pin 0 11] [get_slice_pin cordic_ssb/m_axis_dout_tdata 15 0] ] padded_amplitude]
  stdby [get_not_pin [get_slice_pin ctl/control 1 1] ]
 }
 

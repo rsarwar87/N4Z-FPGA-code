@@ -81,6 +81,9 @@ class Nicola4Z(object):
     def set_user_io(self, value):
         pass
 
+    @command()
+    def set_ssb_tx_frequency(self, value):
+        pass
 
     @command()
     def set_control(self, value):
