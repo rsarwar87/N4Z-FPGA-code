@@ -15,6 +15,7 @@ cores:
   - ./../cores/edge_detector_v1_0
   - ./../cores/i2s_rx_v1_0
   - ./../cores/ssb_modulator_v1_0
+  - ./../cores/averager_v1_0
 
 memory:
   - name: control
@@ -39,7 +40,7 @@ memory:
 
 control_registers:
   - led
-  - ck_outer_io
+  - average
   - user_io
   - control
   - phase_incr[2]
@@ -50,7 +51,8 @@ control_registers:
 
 status_registers:
   - forty_two
-  - buttons
+  - average_amplitude
+  - max_amplitude
   - ck_inner_io
   - data
 

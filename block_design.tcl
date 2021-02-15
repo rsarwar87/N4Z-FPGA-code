@@ -26,15 +26,13 @@ create_bd_port -dir I CS5340_SCLK
 create_bd_port -dir I CS5340_LRCLK
 
 
-# Connect 42 to status register
-connect_pins [get_constant_pin 42 32] [sts_pin forty_two]
+
 
 # Connect LEDs to config register
 connect_port_pin led0 [get_slice_pin ctl/led 2 0]
 connect_port_pin led1 [get_slice_pin ctl/led 5 3]
 
 
-#connect_port_pin ck_outer_io [get_slice_pin [ctl_pin ck_outer_io] 15 0]
 
 #Note the user_dio pins are offset 1 as they seem to need to start from 0!
 connect_port_pin user_dio [get_slice_pin [ctl_pin user_io] 11 0]
@@ -373,6 +371,8 @@ cell xilinx.com:ip:cordic:6.0 cordic_ssb {
 }
 
 
+
+
 cell xilinx.com:ip:c_addsub:12.0 diff_phase {
 B_Width.VALUE_SRC USER 
 A_Width.VALUE_SRC USER 
@@ -388,14 +388,29 @@ Latency 1
 B_Value 00000000000000000000000000000000
 
 } {
-A [get_Q_pin [get_slice_pin cordic_ssb/m_axis_dout_tdata 31 16] 1 cordic_ssb/m_axis_dout_tvalid $adc_clk cordic_latched_8k ]
-B [get_Q_pin cordic_latched_8k/Q 1 cordic_ssb/m_axis_dout_tvalid $adc_clk]
+A [get_Q_pin [get_slice_pin cordic_ssb/m_axis_dout_tdata 31 16] 1 cordic_ssb/m_axis_dout_tvalid $adc_clk cordic_phase_latched_8k ]
+B [get_Q_pin cordic_phase_latched_8k/Q 1 cordic_ssb/m_axis_dout_tvalid $adc_clk]
 CLK $adc_clk
 
 }
 
+#Insert averager here !!!!!!!!!!!!!!!!!!!!
+cell GN:user:averager:1.0 level_monitor {
+
+} {
+clk $adc_clk
+next cordic_ssb/m_axis_dout_tvalid
+rst $rst_adc_clk_name/peripheral_reset
+amplitude [get_Q_pin [get_slice_pin cordic_ssb/m_axis_dout_tdata 15 0] 1 cordic_ssb/m_axis_dout_tvalid $adc_clk cordic_amplitude_latched_8k ]
+}
+
+
+connect_pin [sts_pin average_amplitude] [get_concat_pin [list level_monitor/average [get_constant_pin 0 16]] padded_average]
+connect_pin [sts_pin max_amplitude] [get_concat_pin [list level_monitor/max_val [get_constant_pin 0 16]] padded_max]
+
 
 #clk_wiz_1/clk_out1 is at 8.192MHz ie 1024 (2^10) times 8kHz
+#Amplitude adjusted 31/1/21 to get the maximum dynamic range from the SSB modulation
 
 
 cell GN:user:ssb_modulator:1.0 ssb_tx {
@@ -405,7 +420,7 @@ NBITS 24
  rst $rst_adc_clk_name/peripheral_reset
  delta_phase [get_slice_pin diff_phase/S 13 0] 
  ssb_freq  [get_slice_pin ctl/ssb_tx_frequency 17 0] 
- amplitude [get_concat_pin  [list [get_constant_pin 0 11] [get_slice_pin cordic_ssb/m_axis_dout_tdata 15 0] ] padded_amplitude]
+ amplitude [get_concat_pin  [list [get_constant_pin 0 12] [get_slice_pin cordic_ssb/m_axis_dout_tdata 14 0] ] padded_amplitude]
  stdby [get_not_pin [get_slice_pin ctl/control 1 1] ]
 }
 

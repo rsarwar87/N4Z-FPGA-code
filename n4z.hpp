@@ -70,8 +70,8 @@ class Nicola4Z
     }
 	
 	
-    void set_ck_outer_io(uint32_t value) {
-        ctl.write<reg::ck_outer_io>(value);
+    void set_average(uint32_t value) {
+        ctl.write<reg::average>(value);
     }
     void set_user_io(uint32_t value) {
         ctl.write<reg::user_io>(value);
@@ -82,11 +82,11 @@ class Nicola4Z
     }
 
 
-    uint32_t get_buttons() {
-        return sts.read<reg::buttons>();
+    uint32_t get_max_amplitude() {
+        return sts.read<reg::max_amplitude>();
     }
-    uint32_t get_forty_two() {
-        return sts.read<reg::forty_two>();
+    uint32_t get_average_amplitude() {
+        return sts.read<reg::average_amplitude>();
     }
 
 

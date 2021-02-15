@@ -69,7 +69,11 @@ class Nicola4Z(object):
 
 
     @command()
-    def get_buttons(self):
+    def get_max_amplitude(self):
+        return self.client.recv_uint32()
+
+    @command()
+    def get_average_amplitude(self):
         return self.client.recv_uint32()
 
 
@@ -79,6 +83,10 @@ class Nicola4Z(object):
 
     @command()
     def set_user_io(self, value):
+        pass
+
+    @command()
+    def set_average(self, value):
         pass
 
     @command()
