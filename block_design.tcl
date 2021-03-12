@@ -5,7 +5,7 @@ source $sdk_path/fpga/lib/starting_point.tcl
 # Add config and status registers
 source $sdk_path/fpga/lib/ctl_sts.tcl
 add_ctl_sts
-source $board_path/board_connectionsN4Z.tcl
+source $project_path/board_connectionsN4Z.tcl
 source $board_path/analogue.tcl
 #source $board_path/pmods.tcl
 
@@ -221,7 +221,7 @@ cell xilinx.com:ip:axi_fifo_mm_s:4.1 tx_axis_fifo {
 
   C_TX_FIFO_DEPTH 2048
   C_TX_FIFO_PF_THRESHOLD 2000
-  C_TX_FIFO_PE_THRESHOLD 2
+  C_TX_FIFO_PE_THRESHOLD 6
 } {
   s_axi_aclk [set ps_clk$intercon_idx]
   s_axi_aresetn [set rst${intercon_idx}_name]/peripheral_aresetn

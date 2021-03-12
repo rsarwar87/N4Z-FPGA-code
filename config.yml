@@ -11,11 +11,11 @@ cores:
   - fpga/cores/axis_constant_v1_0
   - fpga/cores/axis_lfsr_v1_0
 
-  - ./../cores/ad5541_v1_0
-  - ./../cores/edge_detector_v1_0
-  - ./../cores/i2s_rx_v1_0
-  - ./../cores/ssb_modulator_v1_0
-  - ./../cores/averager_v1_0
+  - ./cores/ad5541_v1_0
+  - ./cores/edge_detector_v1_0
+  - ./cores/i2s_rx_v1_0
+  - ./cores/ssb_modulator_v1_0
+  - ./cores/averager_v1_0
 
 memory:
   - name: control
