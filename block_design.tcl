@@ -5,7 +5,7 @@ source $sdk_path/fpga/lib/starting_point.tcl
 # Add config and status registers
 source $sdk_path/fpga/lib/ctl_sts.tcl
 add_ctl_sts
-source $project_path/board_connectionsN4Z.tcl
+source $project_path/board_connectionsN4Z_v2.tcl
 source $board_path/analogue.tcl
 #source $board_path/pmods.tcl
 
@@ -25,7 +25,14 @@ create_bd_port -dir I CS5340_SDout
 create_bd_port -dir I CS5340_SCLK
 create_bd_port -dir I CS5340_LRCLK
 
+  set user_dio [ create_bd_port -dir O -from 6 -to 0 user_dio ]
+  set led0 [ create_bd_port -dir O -from 2 -to 0 led0 ]
+  set led1 [ create_bd_port -dir O -from 2 -to 0 led1 ]
 
+create_bd_port -dir O user_spi_mosi 
+create_bd_port -dir O -from  1 -to 0 user_spi_ss
+create_bd_port -dir O user_spi_sck 
+create_bd_port -dir I user_spi_miso 
 
 
 # Connect LEDs to config register
@@ -35,7 +42,7 @@ connect_port_pin led1 [get_slice_pin ctl/led 5 3]
 
 
 #Note the user_dio pins are offset 1 as they seem to need to start from 0!
-connect_port_pin user_dio [get_slice_pin [ctl_pin user_io] 11 0]
+connect_port_pin user_dio [get_slice_pin [ctl_pin user_io] 6 0]
 
 
 connect_pin [sts_pin ck_inner_io] ctl/ssb_tx_frequency
@@ -561,4 +568,24 @@ set_property range  [get_memory_range tx_fifo]  $memory_segment_tx
 #set_property "top" "system_top" $obj
 
 #move_bd_cells [get_bd_cells ctl]  [get_bd_cells slice_15_0_ctl_ck_outer_io] [get_bd_cells slice_12_0_ctl_user_io]
+  # Create instance: axi_spi, and set properties
+  cell xilinx.com:ip:axi_quad_spi:3.2 axi_spi0 {
+   C_USE_STARTUP {0} 
+   C_USE_STARTUP_INT {0} 
+  } {
+    AXI_LITE axi_mem_intercon_0/M[add_master_interface]_AXI
+    ext_spi_clk $ps_name/FCLK_CLK0
+    s_axi_aclk $ps_name/FCLK_CLK0
+    s_axi_aresetn proc_sys_reset_0/peripheral_aresetn
+  }
+  create_bd_addr_seg -range [get_memory_range axi_spi] -offset [get_memory_offset axi_spi] [get_bd_addr_spaces ps_0/Data] [get_bd_addr_segs axi_spi0/AXI_LITE/Reg] SEG_axi_spi0_Reg
+  connect_bd_net [get_bd_ports user_spi_sck] [get_bd_pins axi_spi0/sck_o]
+  connect_bd_net [get_bd_pins axi_spi0/sck_i] [get_bd_pins axi_spi0/sck_o]
+  connect_bd_net [get_bd_ports user_spi_ss] [get_bd_pins axi_spi0/ss_o]
+  connect_bd_net [get_bd_pins axi_spi0/ss_i] [get_bd_pins axi_spi0/ss_o]
+  connect_bd_net [get_bd_pins axi_spi0/io1_i] [get_bd_ports user_spi_miso] 
+  connect_bd_net [get_bd_pins axi_spi0/io0_i] [get_bd_pins axi_spi0/io0_o]
+  connect_bd_net [get_bd_ports user_spi_mosi] [get_bd_pins axi_spi0/io0_o]
+
+  connect_pin ps_0/IRQ_F2P [get_concat_pin [list xadc_wiz_0/ip2intc_irpt axi_iic/iic2intc_irpt axi_spi0/ip2intc_irpt data_axis_fifo/interrupt tx_axis_fifo/interrupt ] ] 
 
