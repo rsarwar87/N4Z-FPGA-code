@@ -624,4 +624,4 @@ set_property range  [get_memory_range tx_fifo]  $memory_segment_tx
   connect_bd_net [get_bd_pins axi_spi0/io0_i] [get_bd_pins axi_spi0/io0_o]
   connect_bd_net [get_bd_ports user_spi_mosi] [get_bd_pins axi_spi0/io0_o]
 
-  connect_pin ps_0/IRQ_F2P [get_concat_pin [list xadc_wiz_0/ip2intc_irpt axi_iic/iic2intc_irpt axi_spi0/ip2intc_irpt data_axis_fifo/interrupt tx_axis_fifo/interrupt ] ] 
+  connect_pin ps_0/IRQ_F2P [get_concat_pin [list xadc_wiz_0/ip2intc_irpt axi_spi0/ip2intc_irpt data_axis_fifo/interrupt tx_axis_fifo/interrupt ] ] 
